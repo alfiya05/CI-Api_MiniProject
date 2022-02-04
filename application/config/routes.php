@@ -60,3 +60,10 @@ $route['signup'] = 'ecomm/User/userSignUp';
 $route['seller/signup'] = 'ecomm/Seller/sellerSignUp';
 
 $route['seller/addproduct'] = 'ecomm/Products/storeProduct';
+$route['seller/getproduct/(:any)'] = 'ecomm/Products/getProduct/$1';
+$route['seller/updateproduct/(:any)'] = 'ecomm/Products/updateProduct/$1';
+$route['seller/deleteproduct/(:any)'] = 'ecomm/Products/deleteProduct/$1';
+
+
+$route['user/order'] = 'ecomm/Order';
+$route['user/order/place'] = 'ecomm/Order/placeOrder';

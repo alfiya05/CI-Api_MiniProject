@@ -9,22 +9,22 @@ use  chriskacerguis\RestServer\RestController;
 
 class Products extends RestController
 {
-    public function __construct($config = 'rest')
+    public function __construct()
     {
-        parent::__construct($config);
+        parent::__construct();
         $this->load->model('ProductModel');
-        $jwt = new JWT;
+
         $token = $this->input->get_request_header('Authorization');
         if (!$token) {
             $output = array("Error" => "Access Denied");
             $this->response($output, RestController::HTTP_UNAUTHORIZED);
+        } else {
+            $q = $this->ProductModel->CheckToken($token);
+            if ($q == false) {
+                $output = array("Error" => "Access Denied to this ");
+                $this->response($output, RestController::HTTP_UNAUTHORIZED);
+            }
         }
-
-        $JwtSecretKey = "MyLoginKey";
-        // $res = $jwt->decode($token, $this->config->item($s), array('HS256'));
-        // $res = $jwt->decode($token, $s, 'HS256');
-        $re = $jwt->decode($token, $JwtSecretKey, "HS256");
-        // print_r($re);
     }
 
     public function index_get()
@@ -32,16 +32,14 @@ class Products extends RestController
         echo "I am RESTful API";
     }
 
+
+
     public function storeProduct_post()
     {
         $prod = new ProductModel;
-        $jwt = new JWT;
-        $JwtSecretKey = "MyLoginKey";
-        $token = $this->input->get_request_header('Authorization');
-        $re = $jwt->decode($token, $JwtSecretKey, "HS256");
-        $re = (array)$re;
         // print_r($re);
         // die;
+        $re = $prod->DecodeToken();
         $data = array(
             'sid' => $re['sid'],
             'pcode' => $this->post('pcode'),
@@ -62,22 +60,64 @@ class Products extends RestController
                     $this->response("Product not Stored!", RestController::HTTP_BAD_REQUEST);
                 }
             } else {
-                $this->response("Same Product already Registered!", RestController::HTTP_BAD_REQUEST);
+                $this->response("Product with this code already Registered!", RestController::HTTP_BAD_REQUEST);
             }
         } else {
             $this->response("Enter all the required fields", RestController::HTTP_BAD_REQUEST);
         }
     }
 
-    public function getProduct_get()
+    public function getProduct_get($pname)
     {
+        $p = new ProductModel;
+        $p1 = $p->FindProduct($pname);
+        $this->response($p1, 200);
     }
 
-    public function updateProduct_put()
+    public function updateProduct_put($id)
     {
+        $prod = new ProductModel;
+        $data = [
+            'pname' =>  $this->put('pname'),
+            'pprice' => $this->put('pprice'),
+            'pstock' => $this->put('pstock')
+        ];
+        $re = $prod->DecodeToken();
+        $pid = $prod->FindSid($id);
+        if (!empty($pid)) {
+            if ($re['sid'] == $pid['sid']) {
+                $result = $prod->UpdateProduct($id, $data);
+                if ($result > 0) {
+                    $this->response('Product details UPDATED', RestController::HTTP_OK);
+                } else {
+                    $this->response('Failed to update details', RestController::HTTP_BAD_REQUEST);
+                }
+            } else {
+                $this->response(['Error' => 'Unauthorised seller'], RestController::HTTP_UNAUTHORIZED);
+            }
+        } else {
+            $this->response('This product does not exist', RestController::HTTP_BAD_REQUEST);
+        }
     }
 
-    public function deleteProduct_delete()
+    public function deleteProduct_delete($id)
     {
+        $prod = new ProductModel;
+        $re = $prod->DecodeToken();
+        $pid = $prod->FindSid($id);
+        if (!empty($pid)) {
+            if ($re['sid'] == $pid['sid']) {
+                $result = $prod->DeleteProduct($id);
+                if ($result > 0) {
+                    $this->response('Product DELETED', RestController::HTTP_OK);
+                } else {
+                    $this->response('FAILED TO DELETE product', RestController::HTTP_BAD_REQUEST);
+                }
+            } else {
+                $this->response(['Error' => 'Unauthorised seller'], RestController::HTTP_UNAUTHORIZED);
+            }
+        } else {
+            $this->response('This product does not exist', RestController::HTTP_BAD_REQUEST);
+        }
     }
 }
