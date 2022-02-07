@@ -66,4 +66,8 @@ $route['seller/deleteproduct/(:any)'] = 'ecomm/Products/deleteProduct/$1';
 
 
 $route['user/order'] = 'ecomm/Order';
+$route['user/address'] = 'ecomm/Order/userAddress';
 $route['user/order/place'] = 'ecomm/Order/placeOrder';
+$route['user/order/view/(:any)'] = 'ecomm/Order/viewOrder/$1';
+$route['user/order/view/user/(:any)'] = 'ecomm/Order/viewUserOrder/$1';
+$route['user/order/cancel/(:any)'] = 'ecomm/Order/cancelOrder/$1';

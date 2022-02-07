@@ -37,8 +37,7 @@ class Products extends RestController
     public function storeProduct_post()
     {
         $prod = new ProductModel;
-        // print_r($re);
-        // die;
+
         $re = $prod->DecodeToken();
         $data = array(
             'sid' => $re['sid'],
@@ -71,7 +70,11 @@ class Products extends RestController
     {
         $p = new ProductModel;
         $p1 = $p->FindProduct($pname);
-        $this->response($p1, 200);
+        if (!empty($p1)) {
+            $this->response($p1, 200);
+        } else {
+            $this->response("No Search Results", RestController::HTTP_BAD_REQUEST);
+        }
     }
 
     public function updateProduct_put($id)

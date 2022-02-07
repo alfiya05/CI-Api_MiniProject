@@ -4,7 +4,6 @@ class ProductModel extends CI_Model
 {
     function CheckToken($token)
     {
-        // $token = $this->input->get_request_header('Authorization');
         $q = $this->db->get_where('sellertoken', array('token' => $token))->result();
         if (empty($q)) {
             return false;
@@ -21,8 +20,6 @@ class ProductModel extends CI_Model
         $re = $jwt->decode($token, $JwtSecretKey, "HS256");
         $re = (array)$re;
         return $re;
-        // print_r($re);
-        // die;
     }
 
     function CheckPorduct($pcode)
@@ -51,23 +48,15 @@ class ProductModel extends CI_Model
     {
         $this->db->select('*');
         $this->db->from('product');
-        $this->db->where('pname', $n);
-
+        $this->db->like('pname', $n);
         return $this->db->get()->result_array();
     }
     function FindSid($n)
     {
-        $this->db->select('*');
-        $this->db->from('product');
-        $this->db->where('pid', $n);
-
-        $q = $this->db->get()->row();
-        // return $this->db->get()->result_array();
-        $q = (array)$q;
+        $q = $this->db->get_where('product', array('pid' => $n))->row_array();
         return $q;
-        // print_r($q);
-        // die;
     }
+
     function UpdateProduct($id, $data)
     {
         return $this->db->where('pid', $id)->update('product', $data);
